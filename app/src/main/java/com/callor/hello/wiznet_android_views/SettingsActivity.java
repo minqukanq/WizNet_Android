@@ -14,13 +14,12 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
-import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 
 import java.util.List;
 
-public class SettingsActivity extends AppCompatPreferenceActivity {
+public class SettingsActivity extends android.preference.PreferenceActivity {
     /**
      * 환경 설정의 요약을 갱신하는 환경 설정 값 변경 리스너 새로운 값을 반영합니다.
      */
@@ -68,18 +67,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         }
     };
 
-    // Setting Action bar의 <- 버튼 활성화
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            finish();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
     /**
      * 도우미 메서드를 사용하여 장치에 초대형 화면이 있는지 확인합니다. 예를 들어, 10 인치 태블릿은 초대형입니다.
      */
@@ -106,12 +93,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Load the preferences from an XML resource
+//        addPreferencesFromResource(R.xml.pref_headers);
         // setting Activity Action bar의 위(뒤)로 가기 버튼 활성화
-        ActionBar ab = getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
+//        ActionBar ab = getSupportActionBar();
+//        ab.setDisplayHomeAsUpEnabled(true);
+//    }
     }
 
 
@@ -133,7 +123,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
-                || GeneralPreferenceFragment.class.getName().equals(fragmentName)
+                || SettingsFragment.class.getName().equals(fragmentName)
                 || DataSyncPreferenceFragment.class.getName().equals(fragmentName)
                 || NotificationPreferenceFragment.class.getName().equals(fragmentName)
                 || RefreshSyncPreferenceFragment.class.getName().equals(fragmentName);
@@ -142,10 +132,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     /**
      * PreferenceFragment를 상속받아 각각의 항목 구성을 실행
      */
-    public static class GeneralPreferenceFragment extends PreferenceFragment {
+    public static class SettingsFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+
             // pref_general.xml 파일로 부터 서브 메뉴 설정
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);

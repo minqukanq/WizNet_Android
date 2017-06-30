@@ -57,7 +57,15 @@ public class MainActivity extends AppCompatActivity implements OnChartValueSelec
     // Handler를 이용하지 않고 Thread에서 화면 갱신을 시행하면 오류가 발생한다.
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
+            refreshDisplay();
+        }
+    };
 
+
+    // 수동으로 데이터 업데이트와 화면 리플레시
+    public void refreshDisplay() {
+
+//        setData();
 //            Toast.makeText(getApplicationContext(), (String) msg.obj, Toast.LENGTH_LONG).show();
             ArrayList<PieEntry> entries = new ArrayList<PieEntry>();
 
@@ -149,10 +157,9 @@ public class MainActivity extends AppCompatActivity implements OnChartValueSelec
             // undo all highlights
             binding.pm25Chart.highlightValues(null);
             binding.pm25Chart.invalidate();
-
-
-        }
     };
+
+
     private Runnable refresh = new Runnable() {
         @Override
         public void run() {
@@ -192,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements OnChartValueSelec
                     return true;
                 case R.id.navigation_dashboard:
 //                    Toast.makeText (MainActivity.this,"dashboard",Toast.LENGTH_LONG).show();
-                    refreshGetData();
+                    refreshDisplay();
 //                    setData();
                     return true;
                 case R.id.navigation_notifications:
@@ -268,20 +275,32 @@ public class MainActivity extends AppCompatActivity implements OnChartValueSelec
         mTfRegular = Typeface.createFromAsset(getAssets(), "12롯데마트행복Bold.ttf");
         mTfLight = Typeface.createFromAsset(getAssets(), "12롯데마트행복Light.ttf");
 
+
+        Date data = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String curDate = simpleDateFormat.format(data);
+        binding.txtMessage.setText("미세먼지 측정데이터 조회중입니다\n" +
+                "잠시만 기다려 주세요..");
+
+        // 설정파일 로딩
         setting = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        chartCreate();
+
 
         // DB 읽기 서비스 실행
         startService = true;
         Intent intent = new Intent(MainActivity.this, ReadLastDB.class);
         startService(intent);
 
+        chartCreate();
+        refreshDisplay();
+
+        // 화면갱신 thread Start
+        new Thread(refresh).start();
+
     }
 
     // 서버에서 새로운 정보를 받아들여 dashboard를 refresh 한다.
-    public void refreshGetData() {
-//        setData();
-    }
+
 
     @Override
     public void onValueSelected(Entry e, Highlight h) {
@@ -344,8 +363,7 @@ public class MainActivity extends AppCompatActivity implements OnChartValueSelec
         binding.pm25Chart.setEntryLabelTypeface(mTfRegular);
         binding.pm25Chart.setEntryLabelTextSize(20f);
 
-        // 화면갱신 thread Start
-        new Thread(refresh).start();
+
     }
 
     private SpannableString generateCenterSpannableText() {
